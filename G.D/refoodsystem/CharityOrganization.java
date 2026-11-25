@@ -1,3 +1,4 @@
+/** Represents a charity that can submit multiple food requests. */
 public class CharityOrganization extends Recipient {
 
     public CharityOrganization(int id, String userName, String contact) {

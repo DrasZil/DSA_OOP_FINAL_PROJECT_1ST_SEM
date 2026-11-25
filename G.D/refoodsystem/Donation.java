@@ -1,3 +1,4 @@
+/** A donor offers one food batch. Its quantity is the available stock. */
 public class Donation {
     private int id;
     private Donor donor;

@@ -1,32 +1,44 @@
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoUnit;
 
 public abstract class FoodItem {
+    private static final DateTimeFormatter DATE_FORMAT =
+            DateTimeFormatter.ofPattern("MM/dd/uuuu").withResolverStyle(ResolverStyle.STRICT);
     private String name;
     private double quantity;
     private String unit;
-    private String expirationDate; // follow mm/dd/yyyy format
+    private LocalDate expirationDate;
 
     public FoodItem(String name, double quantity, String unit, String expirationDate) {
-        this.name = name;
-        this.quantity = quantity;
-        this.unit = unit;
-        this.expirationDate = expirationDate;
+        setName(name);
+        setQuantity(quantity);
+        setUnit(unit);
+        setExpirationDate(expirationDate);
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public final void setName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Food name is required.");
+        }
+        this.name = name.trim();
     }
 
     public double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(double quantity) {
+    public final void setQuantity(double quantity) {
+        // Zero is valid after the last portion of a donation is allocated.
+        if (!Double.isFinite(quantity) || quantity < 0) {
+            throw new IllegalArgumentException("Quantity must be finite and nonnegative.");
+        }
         this.quantity = quantity;
     }
 
@@ -34,32 +46,37 @@ public abstract class FoodItem {
         return unit;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public final void setUnit(String unit) {
+        if (unit == null || unit.trim().isEmpty()) {
+            throw new IllegalArgumentException("Food unit is required.");
+        }
+        this.unit = unit.trim();
     }
 
     public String getExpirationDate() {
-        return expirationDate;
+        return expirationDate.format(DATE_FORMAT);
     }
 
-    public void setExpirationDate(String expirationDate) {
-        this.expirationDate = expirationDate;
+    public final void setExpirationDate(String expirationDate) {
+        try {
+            this.expirationDate = LocalDate.parse(expirationDate == null ? "" : expirationDate.trim(), DATE_FORMAT);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Enter a real date in MM/dd/yyyy format.");
+        }
     }
 
     public String getFoodType(){
         return "not Specified";
     }
 
+    // Matching and sorting can compare actual dates while the console uses formatted text.
+    public LocalDate getExpiryDate() {
+        return expirationDate;
+    }
+
     public String calculateUrgency() {
 
-        String[] dateParts = expirationDate.split("/");
-
-        int month = Integer.parseInt(dateParts[0]);
-        int day = Integer.parseInt(dateParts[1]);
-        int year = Integer.parseInt(dateParts[2]);
-
-        // Convertion
-        LocalDate expiry = LocalDate.of(year, month, day);
+        LocalDate expiry = getExpiryDate();
         LocalDate today = LocalDate.now();
 
         long daysLeft = ChronoUnit.DAYS.between(today, expiry);

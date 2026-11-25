@@ -1,3 +1,4 @@
+/** Supplies the grocery role used when listing registered donors. */
 public class GroceryDonor extends Donor {
     
     public GroceryDonor(int id, String userName, String contact) {

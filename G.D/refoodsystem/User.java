@@ -5,8 +5,21 @@ public abstract class User {
 
     public User(int id, String userName, String contact) {
         this.id = id;
-        this.userName = userName;
-        this.contact = contact;
+        updateDetails(userName, contact);
+    }
+
+    private static String required(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("Organization name and contact are required.");
+        }
+        return value.trim();
+    }
+
+    // Validate both inputs before committing an edit to a registered organization.
+    public final void updateDetails(String name, String contact) {
+        String checkedName = required(name);
+        this.contact = required(contact);
+        this.userName = checkedName;
     }
 
     public int getId() {
@@ -22,7 +35,7 @@ public abstract class User {
     }
 
     public void setUserName(String userName) {
-        this.userName = userName;
+        this.userName = required(userName);
     }
 
     public String getContact() {
@@ -30,7 +43,7 @@ public abstract class User {
     }
 
     public void setContact(String contact) {
-        this.contact = contact;
+        this.contact = required(contact);
     }
 
     public String getRole(){
